@@ -1,0 +1,10 @@
+{
+  "name": "example",
+  "version": "0.0.0",
+  "scripts": {
+    "c:type": "tsc --noEmit"
+  },
+  "dependencies": {
+    "tsc-ls": "link:.."
+  }
+}

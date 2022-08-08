@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "plugins": [
+      {
+        "name": "ts-gql-plugin",
+        "logLevel": "verbose",
+        "projectNameRegex": "([A-Z][a-z]*)"
+      }
+    ]
+  },
+  "include": ["."]
+}
