@@ -7,5 +7,4 @@ TypeScript compiler using language service plugins.
 
 TODO
 
-- compiler running every tsconfig plugins `init(params1).create(params2)`
-- allows params customization
+- allows plugin-init customization

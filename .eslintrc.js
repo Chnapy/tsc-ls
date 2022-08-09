@@ -131,11 +131,7 @@ module.exports = {
     es6: true,
   },
   parserOptions: {
-    project: [
-      './tsconfig.json',
-      './example/tsconfig.json',
-      './tsc-gql/tsconfig.json',
-    ],
+    project: ['./tsconfig.json'],
     tsconfigRootDir: '.',
     sourceType: 'module',
     ecmaVersion: 8, // to enable features such as async/await

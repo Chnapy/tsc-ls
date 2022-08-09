@@ -1,21 +1,20 @@
 import path from 'node:path';
 import ts from 'typescript';
 
-export const getTSConfig = () => {
-  const args = ts.sys.args.slice(1);
+export const getTSConfig = (
+  tsConfigPath: string,
+  tsCompilerOptions?: ts.CompilerOptions
+) => {
+  const tsConfigFoundPath = ts.findConfigFile(tsConfigPath, ts.sys.fileExists);
 
-  const commandLine = ts.parseCommandLine(args, ts.sys.readFile);
-
-  const tsconfigPath =
-    commandLine.options.project ?? ts.findConfigFile('.', ts.sys.fileExists);
-  if (!tsconfigPath) {
-    throw new Error(`tsconfig not found`);
+  if (!tsConfigFoundPath) {
+    throw new Error(`tsConfig not found.`);
   }
 
-  const basePath = path.dirname(tsconfigPath);
+  const basePath = path.join(process.cwd(), path.dirname(tsConfigFoundPath));
 
   const tsConfig = ts.parseJsonConfigFileContent(
-    ts.readConfigFile(tsconfigPath, ts.sys.readFile).config,
+    ts.readConfigFile(tsConfigFoundPath, ts.sys.readFile).config,
     {
       fileExists: ts.sys.fileExists,
       readFile: ts.sys.readFile,
@@ -24,7 +23,7 @@ export const getTSConfig = () => {
       trace: console.log,
     },
     basePath,
-    commandLine.options
+    tsCompilerOptions
   );
 
   return { tsConfig, basePath };

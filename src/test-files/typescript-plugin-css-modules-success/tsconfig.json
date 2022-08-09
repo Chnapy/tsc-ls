@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
+    "module": "commonjs",
+    "lib": ["ESNext", "dom"],
+
+    "plugins": [
+      {
+        "name": "typescript-plugin-css-modules"
+      }
+    ]
+  },
+  "include": ["."]
+}

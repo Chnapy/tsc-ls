@@ -1,52 +1,39 @@
 import fs from 'node:fs';
-import {
-  createLogger,
-  createSourceUpdater,
-  isValidFilename,
-  waitPromiseSync,
-} from 'ts-gql-plugin/tools';
 import ts from 'typescript';
-import { getPluginConfig } from './get-plugin-config';
 
 export const createLanguageServiceHost = (
   { fileNames, options }: Pick<ts.ParsedCommandLine, 'fileNames' | 'options'>,
   basePath: string
 ): ts.LanguageServiceHost => {
-  const pluginConfig = getPluginConfig(options);
+  const browsedFiles = new Map<string, ts.IScriptSnapshot | undefined>();
 
-  const updateSource = createSourceUpdater(
-    basePath,
-    pluginConfig,
-    createLogger(pluginConfig.logLevel, {
-      info: console.log,
-    })
-  );
+  const getScriptSnapshotFn: ts.LanguageServiceHost['getScriptSnapshot'] = (
+    fileName
+  ) => {
+    if (!fs.existsSync(fileName)) {
+      return undefined;
+    }
 
-  const browsedFileNames = new Set<string>();
+    const source = fs.readFileSync(fileName).toString();
+
+    return ts.ScriptSnapshot.fromString(source);
+  };
+
+  const host = ts.createCompilerHost(options);
 
   return {
     getScriptFileNames: () => fileNames,
     getScriptVersion: () => '0',
     getScriptSnapshot: (fileName) => {
-      if (!fs.existsSync(fileName)) {
-        return undefined;
+      if (browsedFiles.has(fileName)) {
+        return browsedFiles.get(fileName);
       }
 
-      const source = fs.readFileSync(fileName).toString();
+      const snapshot = getScriptSnapshotFn(fileName);
 
-      if (browsedFileNames.has(fileName)) {
-        return ts.ScriptSnapshot.fromString(source);
-      }
+      browsedFiles.set(fileName, snapshot);
 
-      browsedFileNames.add(fileName);
-
-      if (isValidFilename(fileName)) {
-        return ts.ScriptSnapshot.fromString(
-          waitPromiseSync(updateSource(fileName, source))
-        );
-      }
-
-      return ts.ScriptSnapshot.fromString(source);
+      return snapshot;
     },
     getCurrentDirectory: () => basePath,
     getCompilationSettings: () => options,
@@ -56,5 +43,15 @@ export const createLanguageServiceHost = (
     readDirectory: ts.sys.readDirectory,
     directoryExists: ts.sys.directoryExists,
     getDirectories: ts.sys.getDirectories,
+    resolveModuleNames: (moduleNames, containingFile) =>
+      moduleNames.map((moduleName): ts.ResolvedModule | undefined => {
+        const result = ts.resolveModuleName(
+          moduleName,
+          containingFile,
+          options,
+          host
+        );
+        return result.resolvedModule;
+      }),
   };
 };
