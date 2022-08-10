@@ -9,7 +9,6 @@ const commandLine = ts.parseCommandLine(args, ts.sys.readFile);
 
 const tsConfigPath = commandLine.options.project ?? '.';
 
-/* eslint-disable unicorn/prefer-top-level-await */
 compile({
   tsConfigPath,
   tsCompilerOptions: commandLine.options,

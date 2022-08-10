@@ -1,14 +1,16 @@
 import ts from 'typescript/lib/tsserverlibrary';
+import { compileReferences } from './compile-references';
 import { getPlugins } from './get-plugins';
 import { getTSConfig } from './get-ts-config';
 import { initPlugin } from './init-plugin';
 import { createLanguageServiceHost } from './language-service-host';
 import { resetTS } from './tools/reset-ts';
 
-type CompileOptions = {
+export type CompileOptions = {
   tsConfigPath: string;
   tsCompilerOptions?: ts.CompilerOptions;
   logger?: (msg: string) => void;
+  projectsBrowsed?: Set<string>;
 };
 
 export type CompileResult = {
@@ -17,10 +19,11 @@ export type CompileResult = {
   hasErrors: boolean;
 };
 
-export const compile = ({
+export const compile = async ({
   tsConfigPath,
   tsCompilerOptions,
   logger = console.log,
+  projectsBrowsed = new Set(),
 }: CompileOptions) => {
   const cwd = process.cwd();
 
@@ -35,7 +38,17 @@ export const compile = ({
     ts.createDocumentRegistry()
   );
 
-  return new Promise<CompileResult>((resolve) => {
+  const diagnostics = await compileReferences(
+    tsConfig.projectReferences ?? [],
+    {
+      tsCompilerOptions,
+      logger,
+      projectsBrowsed,
+    }
+  );
+
+  return await new Promise<CompileResult>((resolve) => {
+    // nextTick() required for plugins using deasync lib
     process.nextTick(() => {
       const languageService = plugins.reduce(
         (ls, pluginConfig) =>
@@ -50,13 +63,16 @@ export const compile = ({
         languageServiceRaw
       );
 
-      const program = languageService.getProgram();
-      const files = program!.getSourceFiles();
+      const program = languageService.getProgram()!;
+      const files = program.getSourceFiles();
 
       resetTS();
 
-      const diagnostics = files.flatMap((sf) =>
-        languageService.getSemanticDiagnostics(sf.fileName)
+      diagnostics.push(
+        ...files.flatMap((sf) => [
+          ...languageService.getSemanticDiagnostics(sf.fileName),
+          ...languageService.getSyntacticDiagnostics(sf.fileName),
+        ])
       );
 
       const errors = diagnostics.filter(
@@ -65,14 +81,19 @@ export const compile = ({
 
       const hasErrors = errors.length > 0;
 
-      const writeDiagnostics = () =>
+      const writeDiagnostics = () => {
         process.stdout.write(
           ts.formatDiagnosticsWithColorAndContext(diagnostics, {
             getCurrentDirectory: () => process.cwd(),
             getCanonicalFileName: (fileName) => fileName,
-            getNewLine: () => '\n',
+            getNewLine: () => ts.sys.newLine,
           })
         );
+
+        if (hasErrors) {
+          logger(`Found ${errors.length} errors.`);
+        }
+      };
 
       resolve({
         diagnostics,

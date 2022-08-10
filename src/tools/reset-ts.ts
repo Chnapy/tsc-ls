@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import ts from 'typescript/lib/tsserverlibrary';
 
 const tsEntries = Object.entries(ts);

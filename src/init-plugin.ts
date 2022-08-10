@@ -36,7 +36,6 @@ export const initPlugin = (
     config: pluginConfig,
     languageService,
     languageServiceHost,
-    /* eslint-disable @typescript-eslint/no-explicit-any */
     serverHost: null as any,
     project: {
       getCurrentDirectory: () => basePath,
@@ -46,7 +45,6 @@ export const initPlugin = (
           info: logger,
         },
       },
-      /* eslint-disable @typescript-eslint/no-explicit-any */
     } as any,
   });
 

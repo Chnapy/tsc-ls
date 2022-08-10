@@ -126,4 +126,16 @@ describe('tsc-ls compiler', () => {
       expectResultErrors(result, false);
     });
   });
+
+  it('project references with common code & plugins', async () => {
+    const result = await compile({
+      tsConfigPath: './src/test-files/project-references/tsconfig.json',
+      logger,
+    });
+
+    expectGlobalsNotChanged();
+
+    result.writeDiagnostics();
+    expectResultErrors(result, true, 1);
+  });
 });
