@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "outDir": "dist",
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "moduleResolution": "node",
@@ -12,5 +16,6 @@
     "module": "commonjs",
     "lib": ["ESNext", "dom"]
   },
-  "include": ["."]
+  "include": ["."],
+  "exclude": ["dist"]
 }

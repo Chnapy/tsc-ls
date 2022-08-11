@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "outDir": "dist",
+
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "moduleResolution": "node",

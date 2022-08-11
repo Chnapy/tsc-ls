@@ -1,17 +1,5 @@
-import fs from 'node:fs';
 import ts from 'typescript';
-
-const getScriptSnapshotFn: ts.LanguageServiceHost['getScriptSnapshot'] = (
-  fileName
-) => {
-  if (!fs.existsSync(fileName)) {
-    return undefined;
-  }
-
-  const source = fs.readFileSync(fileName).toString();
-
-  return ts.ScriptSnapshot.fromString(source);
-};
+import { createCachedGetScriptSnapshot } from './get-script-snapshot';
 
 export const createLanguageServiceHost = (
   {
@@ -21,26 +9,13 @@ export const createLanguageServiceHost = (
   }: Pick<ts.ParsedCommandLine, 'fileNames' | 'options' | 'projectReferences'>,
   basePath: string
 ): ts.LanguageServiceHost => {
-  const browsedFiles = new Map<string, ts.IScriptSnapshot | undefined>();
-
   const host = ts.createCompilerHost(options);
 
   return {
     useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
     getScriptFileNames: () => fileNames,
-    getScriptVersion: (path) =>
-      (ts.sys.readFile(path) && ts.sys.createHash?.(path)) ?? '',
-    getScriptSnapshot: (fileName) => {
-      if (browsedFiles.has(fileName)) {
-        return browsedFiles.get(fileName);
-      }
-
-      const snapshot = getScriptSnapshotFn(fileName);
-
-      browsedFiles.set(fileName, snapshot);
-
-      return snapshot;
-    },
+    getScriptVersion: () => '',
+    getScriptSnapshot: createCachedGetScriptSnapshot(),
     getCurrentDirectory: () => basePath,
     getCompilationSettings: () => options,
     getProjectReferences: () => projectReferences,

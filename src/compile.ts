@@ -1,16 +1,12 @@
 import ts from 'typescript/lib/tsserverlibrary';
-import { compileReferences } from './compile-references';
-import { getPlugins } from './get-plugins';
-import { getTSConfig } from './get-ts-config';
-import { initPlugin } from './init-plugin';
-import { createLanguageServiceHost } from './language-service-host';
-import { resetTS } from './tools/reset-ts';
+import { createBuilderHost } from './builder-host';
+import { createServicesFromConfig } from './create-services-from-config';
+import { createCachedGetScriptSnapshot } from './get-script-snapshot';
+import { DiagnosticsError } from './tools/diagnostics-error';
 
 export type CompileOptions = {
-  tsConfigPath: string;
-  tsCompilerOptions?: ts.CompilerOptions;
+  parsedCommandLine: ts.ParsedCommandLine;
   logger?: (msg: string) => void;
-  projectsBrowsed?: Set<string>;
 };
 
 export type CompileResult = {
@@ -19,87 +15,135 @@ export type CompileResult = {
   hasErrors: boolean;
 };
 
+const getWriteDiagnostics = (diagnostics: ts.Diagnostic[]) => () => {
+  process.stdout.write(
+    ts.formatDiagnosticsWithColorAndContext(diagnostics, {
+      getCurrentDirectory: () => process.cwd(),
+      getCanonicalFileName: (fileName) => fileName,
+      getNewLine: () => ts.sys.newLine,
+    })
+  );
+
+  const errors = diagnostics.filter(
+    ({ category }) => category === ts.DiagnosticCategory.Error
+  );
+
+  if (errors.length > 0) {
+    process.stdout.write(`Found ${errors.length} errors.\n`);
+  }
+};
+
 export const compile = async ({
-  tsConfigPath,
-  tsCompilerOptions,
+  parsedCommandLine,
   logger = console.log,
-  projectsBrowsed = new Set(),
-}: CompileOptions) => {
-  const cwd = process.cwd();
+}: CompileOptions): Promise<CompileResult> => {
+  try {
+    const documentRegistry = ts.createDocumentRegistry();
 
-  const { tsConfig, basePath } = getTSConfig(tsConfigPath, tsCompilerOptions);
+    const getScriptSnapshot = createCachedGetScriptSnapshot();
 
-  const plugins = getPlugins(tsConfig.options);
-
-  const languageServiceHost = createLanguageServiceHost(tsConfig, basePath);
-
-  const languageServiceRaw = ts.createLanguageService(
-    languageServiceHost,
-    ts.createDocumentRegistry()
-  );
-
-  const diagnostics = await compileReferences(
-    tsConfig.projectReferences ?? [],
-    {
-      tsCompilerOptions,
-      logger,
-      projectsBrowsed,
-    }
-  );
-
-  return await new Promise<CompileResult>((resolve) => {
-    // nextTick() required for plugins using deasync lib
-    process.nextTick(() => {
-      const languageService = plugins.reduce(
-        (ls, pluginConfig) =>
-          initPlugin(pluginConfig, {
-            languageService: ls,
-            languageServiceHost,
-            cwd,
-            basePath,
-            compilerOptions: tsConfig.options,
-            logger,
-          }),
-        languageServiceRaw
+    const { getServicesFromPath, projectsPaths, mainProjectPath, mainProject } =
+      createServicesFromConfig(
+        {
+          parsedCommandLine,
+          logger,
+        },
+        documentRegistry
       );
 
-      const program = languageService.getProgram()!;
-      const files = program.getSourceFiles();
+    console.log(mainProjectPath);
 
-      resetTS();
+    return await new Promise<CompileResult>((resolve) => {
+      // nextTick() required for plugins using deasync lib
+      process.nextTick(() => {
+        for (const projectPath of projectsPaths) {
+          getServicesFromPath(projectPath)!.initialyzePluginsOnce();
+        }
 
-      diagnostics.push(
-        ...files.flatMap((sf) => [
-          ...languageService.getSemanticDiagnostics(sf.fileName),
-          ...languageService.getSyntacticDiagnostics(sf.fileName),
-        ])
-      );
+        const diagnostics: ts.Diagnostic[] = [];
 
-      const errors = diagnostics.filter(
-        ({ category }) => category === ts.DiagnosticCategory.Error
-      );
+        // const program = languageService.getProgram()!;
 
-      const hasErrors = errors.length > 0;
+        const builderHost = createBuilderHost({
+          mainProject,
+          getServicesFromPath,
+          getScriptSnapshot,
+          diagnosticReporter: (diagnostic) => {
+            // TODO edit ts-gql-plugin to pass diagnostics directly
+            diagnostics.push(diagnostic);
+          },
+        });
 
-      const writeDiagnostics = () => {
-        process.stdout.write(
-          ts.formatDiagnosticsWithColorAndContext(diagnostics, {
-            getCurrentDirectory: () => process.cwd(),
-            getCanonicalFileName: (fileName) => fileName,
-            getNewLine: () => ts.sys.newLine,
-          })
+        // const projects = new Set<string>(
+        //   (tsConfig.projectReferences ?? []).map((p) => p.path)
+        // );
+        // const fileNames = new Set<string>();
+
+        const builder = ts.createSolutionBuilder(
+          builderHost,
+          // (tsConfig.projectReferences ?? []).map((pr) => pr.path),
+          [mainProject.basePath],
+          mainProject.tsConfig.options as ts.BuildOptions
         );
 
-        if (hasErrors) {
-          logger(`Found ${errors.length} errors.`);
-        }
-      };
+        console.log(
+          'BUILD',
+          builder.build(),
+          // projectsPaths,
+          mainProjectPath
+          // fileNames
+        );
 
-      resolve({
-        diagnostics,
-        writeDiagnostics,
-        hasErrors,
+        // const files = Array.from(fileNames); // program.getSourceFiles().map(sf => sf.fileName);
+
+        // resetTS();
+
+        // diagnostics.push(
+        //   ...files.flatMap((fileName) => {
+        //     const services = getServicesFromPath(fileName);
+        //     if (!services || fileName.endsWith('.css')) {
+        //       return [];
+        //     }
+
+        //     try {
+        //       // return services
+        //       //   .initialyzePluginsOnce()
+        //       //   .languageService.getSemanticDiagnostics(fileName)
+        //       //   .filter((diag) => diag.messageText?.includes('GraphQL'));
+        //     } catch (e) {}
+        //     return [];
+        //     // try {
+        //     //   if (!fileName.endsWith('.css'))
+        //     //     return [
+        //     //       // ...languageService.getSemanticDiagnostics(fileName),
+        //     //       // ...languageService.getSyntacticDiagnostics(sf.fileName),
+        //     //     ];
+        //     // } catch (e) {
+        //     //   console.warn(e);
+        //     // }
+        //     // return [];
+        //   })
+        // );
+
+        const hasErrors = diagnostics.some(
+          ({ category }) => category === ts.DiagnosticCategory.Error
+        );
+
+        resolve({
+          diagnostics,
+          writeDiagnostics: getWriteDiagnostics(diagnostics),
+          hasErrors,
+        });
       });
     });
-  });
+  } catch (error) {
+    if (error instanceof DiagnosticsError) {
+      return {
+        hasErrors: true,
+        diagnostics: error.diagnostics,
+        writeDiagnostics: getWriteDiagnostics(error.diagnostics),
+      };
+    }
+    throw error;
+  }
 };

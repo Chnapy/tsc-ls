@@ -18,6 +18,7 @@ type ExtraParams = {
  */
 export const initPlugin = (
   pluginConfig: ts.PluginImport,
+  tsProxy: typeof ts,
   {
     languageService,
     languageServiceHost,
@@ -31,7 +32,7 @@ export const initPlugin = (
   const init: PluginInit = require(pluginConfig.name);
 
   languageService = init({
-    typescript: ts,
+    typescript: tsProxy,
   }).create({
     config: pluginConfig,
     languageService,

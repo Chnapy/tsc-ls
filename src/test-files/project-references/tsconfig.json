@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "composite": true,
+    "incremental": true,
+    "noEmit": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
 
     "jsx": "react-jsx",
     "allowJs": true,

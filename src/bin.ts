@@ -2,16 +2,17 @@
 
 import ts from 'typescript';
 import { compile } from './compile';
+import { workarounds } from './workarounds';
 
 const args = ts.sys.args;
 
-const commandLine = ts.parseCommandLine(args, ts.sys.readFile);
-
-const tsConfigPath = commandLine.options.project ?? '.';
+const parsedCommandLine = workarounds.parsePatchedCommandLine(
+  args,
+  ts.sys.readFile
+);
 
 compile({
-  tsConfigPath,
-  tsCompilerOptions: commandLine.options,
+  parsedCommandLine,
   logger: () => void 0,
 }).then(({ hasErrors, writeDiagnostics }) => {
   writeDiagnostics();

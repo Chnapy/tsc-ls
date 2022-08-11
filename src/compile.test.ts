@@ -1,10 +1,9 @@
 import ts from 'typescript/lib/tsserverlibrary';
 import { compile, CompileResult } from './compile';
+import { workarounds } from './workarounds';
 
 describe('tsc-ls compiler', () => {
   const cwd = process.cwd();
-
-  const logger = jest.fn();
 
   const oldTsEntries = Object.entries(ts);
 
@@ -13,12 +12,19 @@ describe('tsc-ls compiler', () => {
     hasErrors: boolean,
     errorsLength = 0
   ) => {
-    expect(result.hasErrors).toEqual(hasErrors);
     expect(
-      result.diagnostics.filter(
-        (diagnostic) => diagnostic.category === ts.DiagnosticCategory.Error
-      )
+      result.diagnostics
+        .filter(
+          (diagnostic) => diagnostic.category === ts.DiagnosticCategory.Error
+        )
+        .map((diagnostic) => ({
+          message: diagnostic.messageText,
+          file: diagnostic.file?.fileName,
+        }))
     ).toHaveLength(errorsLength);
+    expect(result.hasErrors).toEqual(hasErrors);
+
+    result.writeDiagnostics();
   };
 
   const expectGlobalsNotChanged = () => {
@@ -29,12 +35,25 @@ describe('tsc-ls compiler', () => {
     expect(process.cwd()).toEqual(cwd);
   };
 
+  const compileFromCommandLine = async (commandLine: string) => {
+    const parsedCommandLine = workarounds.parsePatchedCommandLine(
+      commandLine.split(' '),
+      ts.sys.readFile
+    );
+
+    const logger = jest.fn();
+
+    return await compile({
+      parsedCommandLine,
+      logger,
+    });
+  };
+
   describe('common TS code', () => {
     it('gives error with bad code', async () => {
-      const result = await compile({
-        tsConfigPath: './src/test-files/common-error/tsconfig.json',
-        logger,
-      });
+      const result = await compileFromCommandLine(
+        '-b ./src/test-files/common-error'
+      );
 
       expectGlobalsNotChanged();
 
@@ -42,10 +61,9 @@ describe('tsc-ls compiler', () => {
     });
 
     it('gives success with good code', async () => {
-      const result = await compile({
-        tsConfigPath: './src/test-files/common-success/tsconfig.json',
-        logger,
-      });
+      const result = await compileFromCommandLine(
+        '-b ./src/test-files/common-success'
+      );
 
       expectGlobalsNotChanged();
 
@@ -55,11 +73,9 @@ describe('tsc-ls compiler', () => {
 
   describe('plugin typescript-plugin-css-modules', () => {
     it('gives error with bad code', async () => {
-      const result = await compile({
-        tsConfigPath:
-          './src/test-files/typescript-plugin-css-modules-error/tsconfig.json',
-        logger,
-      });
+      const result = await compileFromCommandLine(
+        '-b ./src/test-files/typescript-plugin-css-modules-error'
+      );
 
       expectGlobalsNotChanged();
 
@@ -67,11 +83,9 @@ describe('tsc-ls compiler', () => {
     });
 
     it('gives success with good code', async () => {
-      const result = await compile({
-        tsConfigPath:
-          './src/test-files/typescript-plugin-css-modules-success/tsconfig.json',
-        logger,
-      });
+      const result = await compileFromCommandLine(
+        '-b ./src/test-files/typescript-plugin-css-modules-success'
+      );
 
       expectGlobalsNotChanged();
 
@@ -81,10 +95,9 @@ describe('tsc-ls compiler', () => {
 
   describe('plugin ts-gql-plugin', () => {
     it('gives error with bad code', async () => {
-      const result = await compile({
-        tsConfigPath: './src/test-files/ts-gql-plugin-error/tsconfig.json',
-        logger,
-      });
+      const result = await compileFromCommandLine(
+        '-b ./src/test-files/ts-gql-plugin-error'
+      );
 
       expectGlobalsNotChanged();
 
@@ -92,10 +105,9 @@ describe('tsc-ls compiler', () => {
     });
 
     it('gives success with good code', async () => {
-      const result = await compile({
-        tsConfigPath: './src/test-files/ts-gql-plugin-success/tsconfig.json',
-        logger,
-      });
+      const result = await compileFromCommandLine(
+        '-b ./src/test-files/ts-gql-plugin-success'
+      );
 
       expectGlobalsNotChanged();
 
@@ -105,10 +117,9 @@ describe('tsc-ls compiler', () => {
 
   describe('multiple plugins: typescript-plugin-css-modules & ts-gql-plugin', () => {
     it('gives errors with bad code', async () => {
-      const result = await compile({
-        tsConfigPath: './src/test-files/multiple-plugins-error/tsconfig.json',
-        logger,
-      });
+      const result = await compileFromCommandLine(
+        '-b ./src/test-files/multiple-plugins-error'
+      );
 
       expectGlobalsNotChanged();
 
@@ -116,10 +127,9 @@ describe('tsc-ls compiler', () => {
     });
 
     it('gives success with good code', async () => {
-      const result = await compile({
-        tsConfigPath: './src/test-files/multiple-plugins-success/tsconfig.json',
-        logger,
-      });
+      const result = await compileFromCommandLine(
+        '-b ./src/test-files/multiple-plugins-success'
+      );
 
       expectGlobalsNotChanged();
 
@@ -128,14 +138,12 @@ describe('tsc-ls compiler', () => {
   });
 
   it('project references with common code & plugins', async () => {
-    const result = await compile({
-      tsConfigPath: './src/test-files/project-references/tsconfig.json',
-      logger,
-    });
+    const result = await compileFromCommandLine(
+      '-b ./src/test-files/project-references'
+    );
 
     expectGlobalsNotChanged();
 
-    result.writeDiagnostics();
     expectResultErrors(result, true, 1);
   });
 });
