@@ -42,13 +42,16 @@ export const compile = async ({
 
     const getScriptSnapshot = createCachedGetScriptSnapshot();
 
+    const pluginsDiagnostics = new Map<string, ts.Diagnostic[]>();
+
     const { getServicesFromPath, projectsPaths, mainProject } =
       createServicesFromConfig(
         {
           parsedCommandLine,
           logger,
         },
-        documentRegistry
+        documentRegistry,
+        pluginsDiagnostics
       );
 
     return await new Promise<CompileResult>((resolve) => {
@@ -57,9 +60,6 @@ export const compile = async ({
         for (const projectPath of projectsPaths) {
           getServicesFromPath(projectPath)!.initializePluginsOnce();
         }
-
-        const { pluginsDiagnostics } =
-          mainProject.initializePluginsOnce().languageService;
 
         const diagnostics: ts.Diagnostic[] = [];
 

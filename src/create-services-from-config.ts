@@ -29,7 +29,8 @@ export type GetServicesFromPath = (path: string) => TSServices | null;
 
 export const createServicesFromConfig = (
   { parsedCommandLine, logger = console.log }: CompileOptions,
-  documentRegistry: ts.DocumentRegistry
+  documentRegistry: ts.DocumentRegistry,
+  pluginsDiagnostics: Map<string, ts.Diagnostic[]>
 ) => {
   const cwd = process.cwd();
 
@@ -42,7 +43,8 @@ export const createServicesFromConfig = (
   });
 
   const languageServiceRaw = createLanguageServiceWithDiagnostics(
-    ts.createLanguageService(languageServiceHost, documentRegistry)
+    ts.createLanguageService(languageServiceHost, documentRegistry),
+    pluginsDiagnostics
   );
 
   let languageService: LanguageServiceWithDiagnostics | null = null;
@@ -100,7 +102,8 @@ export const createServicesFromConfig = (
           )!,
           logger,
         },
-        documentRegistry
+        documentRegistry,
+        pluginsDiagnostics
       ).servicesMap,
     }),
     initialMap

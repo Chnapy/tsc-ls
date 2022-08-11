@@ -8,11 +8,10 @@ export type LanguageServiceWithDiagnostics = ts.LanguageService & {
 };
 
 export const createLanguageServiceWithDiagnostics = (
-  languageService: ts.LanguageService
-): LanguageServiceWithDiagnostics => {
-  const pluginsDiagnostics = new Map<string, ts.Diagnostic[]>();
-
-  return new Proxy(languageService as LanguageServiceWithDiagnostics, {
+  languageService: ts.LanguageService,
+  pluginsDiagnostics: Map<string, ts.Diagnostic[]>
+): LanguageServiceWithDiagnostics =>
+  new Proxy(languageService as LanguageServiceWithDiagnostics, {
     get: (target, property) => {
       if (property === pluginsDiagnosticsProperty) {
         return pluginsDiagnostics;
@@ -21,4 +20,3 @@ export const createLanguageServiceWithDiagnostics = (
       return target[property as keyof LanguageServiceWithDiagnostics];
     },
   });
-};
