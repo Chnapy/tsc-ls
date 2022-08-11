@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { CompileOptions } from './compile';
 import { createCachedGetScriptSnapshot } from './get-script-snapshot';
 
 export const createLanguageServiceHost = (
@@ -7,7 +8,8 @@ export const createLanguageServiceHost = (
     options,
     projectReferences,
   }: Pick<ts.ParsedCommandLine, 'fileNames' | 'options' | 'projectReferences'>,
-  basePath: string
+  basePath: string,
+  { logger = console.log }: Pick<CompileOptions, 'logger'>
 ): ts.LanguageServiceHost => {
   const host = ts.createCompilerHost(options);
 
@@ -36,7 +38,7 @@ export const createLanguageServiceHost = (
         );
         return result.resolvedModule;
       }),
-    log: console.log,
-    trace: console.log,
+    log: logger,
+    trace: logger,
   };
 };

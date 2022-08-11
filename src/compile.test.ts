@@ -2,7 +2,7 @@ import ts from 'typescript/lib/tsserverlibrary';
 import { compile, CompileResult } from './compile';
 import { workarounds } from './workarounds';
 
-describe('tsc-ls compiler', () => {
+describe('tsc-ls compiler in build mode', () => {
   const cwd = process.cwd();
 
   const oldTsEntries = Object.entries(ts);
@@ -22,6 +22,7 @@ describe('tsc-ls compiler', () => {
           file: diagnostic.file?.fileName,
         }))
     ).toHaveLength(errorsLength);
+
     expect(result.hasErrors).toEqual(hasErrors);
 
     result.writeDiagnostics();

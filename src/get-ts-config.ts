@@ -1,5 +1,6 @@
 import path from 'node:path';
 import ts from 'typescript';
+import { CompileOptions } from './compile';
 import { DiagnosticsError } from './tools/diagnostics-error';
 import { normalizeTSConfigPath } from './tools/normalize-tsconfig-path';
 
@@ -24,15 +25,20 @@ const getTSConfigPath = (parsedCommandLine: ts.ParsedCommandLine) => {
   }
 };
 
-const createParseConfigHost = (): ts.ParseConfigHost => ({
+const createParseConfigHost = ({
+  logger = console.log,
+}: Pick<CompileOptions, 'logger'>): ts.ParseConfigHost => ({
   fileExists: ts.sys.fileExists,
   readFile: ts.sys.readFile,
   readDirectory: ts.sys.readDirectory,
   useCaseSensitiveFileNames: true,
-  trace: console.log,
+  trace: logger,
 });
 
-export const getTSConfig = (parsedCommandLine: ts.ParsedCommandLine) => {
+export const getTSConfig = (
+  parsedCommandLine: ts.ParsedCommandLine,
+  { logger = console.log }: Pick<CompileOptions, 'logger'>
+) => {
   if (parsedCommandLine.errors.length > 0) {
     throw new DiagnosticsError(parsedCommandLine.errors);
   }
@@ -40,7 +46,7 @@ export const getTSConfig = (parsedCommandLine: ts.ParsedCommandLine) => {
   const tsConfigFoundPath = getTSConfigPath(parsedCommandLine);
 
   if (!tsConfigFoundPath) {
-    throw new Error(`tsConfig not found.`);
+    throw new Error(`tsconfig file not found.`);
   }
 
   const absolutePath = getAbsolutePath(tsConfigFoundPath);
@@ -49,7 +55,7 @@ export const getTSConfig = (parsedCommandLine: ts.ParsedCommandLine) => {
 
   const tsConfig = ts.parseJsonConfigFileContent(
     ts.readConfigFile(tsConfigFoundPath, ts.sys.readFile).config,
-    createParseConfigHost(),
+    createParseConfigHost({ logger }),
     basePath,
     parsedCommandLine.options
   );

@@ -15,6 +15,7 @@ type ExtraParams = {
 
 /**
  * Initialize plugin running its content.
+ * Keep in mind this function may mutate some of given services (tsProxy, languageService, host, ...).
  */
 export const initPlugin = (
   pluginConfig: ts.PluginImport,

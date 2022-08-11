@@ -1,20 +1,40 @@
 #!/usr/bin/env node
 
 import ts from 'typescript';
-import { compile } from './compile';
+import { compile, getWriteDiagnostics } from './compile';
+import { DiagnosticsError } from './tools/diagnostics-error';
 import { workarounds } from './workarounds';
 
-const args = ts.sys.args;
+const compileFromCommandLine = async () => {
+  const args = ts.sys.args;
 
-const parsedCommandLine = workarounds.parsePatchedCommandLine(
-  args,
-  ts.sys.readFile
-);
+  try {
+    const parsedCommandLine = workarounds.parsePatchedCommandLine(
+      args,
+      ts.sys.readFile
+    );
 
-compile({
-  parsedCommandLine,
-  logger: () => void 0,
-}).then(({ hasErrors, writeDiagnostics }) => {
+    const logger = parsedCommandLine.options.verbose
+      ? console.log
+      : () => void 0;
+
+    return await compile({
+      parsedCommandLine,
+      logger,
+    });
+  } catch (error) {
+    if (error instanceof DiagnosticsError) {
+      return {
+        hasErrors: true,
+        diagnostics: error.diagnostics,
+        writeDiagnostics: getWriteDiagnostics(error.diagnostics),
+      };
+    }
+    throw error;
+  }
+};
+
+compileFromCommandLine().then(({ hasErrors, writeDiagnostics }) => {
   writeDiagnostics();
 
   if (hasErrors) {

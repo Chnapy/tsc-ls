@@ -1,4 +1,6 @@
 import ts from 'typescript';
+import { createIsCSS } from 'typescript-plugin-css-modules/lib/helpers/cssExtensions';
+import { DiagnosticsError } from './tools/diagnostics-error';
 import { objectOverride } from './tools/object-override';
 
 /**
@@ -36,6 +38,14 @@ export const createPatchedBuilderProgram =
       configFileParsingDiagnostics
     );
 
+    const isCSS = createIsCSS();
+
+    const CSSImportErrorRegex =
+      /\.module\.(((c|le|sa|sc)ss)|styl)"?' (is not listed within the file list of project|is not a module|has no default export)/;
+
+    const isCSSImportError = (message: string) =>
+      CSSImportErrorRegex.test(message);
+
     const overrideBuilderProgram = objectOverride(builderProgram);
 
     overrideBuilderProgram(
@@ -50,10 +60,23 @@ export const createPatchedBuilderProgram =
                 ? diagnostic.messageText
                 : diagnostic.messageText.messageText;
 
-            return !message.includes(
-              ' is not listed within the file list of project'
+            return (
+              !diagnostic.file ||
+              (!isCSS(diagnostic.file.fileName) && !isCSSImportError(message))
             );
           });
+        }
+    );
+
+    overrideBuilderProgram(
+      'getSyntacticDiagnostics',
+      (initialFn) =>
+        (...args) => {
+          const diagnostics = initialFn(...args);
+
+          return diagnostics.filter(
+            (diagnostic) => !diagnostic.file || !isCSS(diagnostic.file.fileName)
+          );
         }
     );
 
@@ -76,7 +99,17 @@ export const parsePatchedCommandLine: typeof ts.parseCommandLine = (
   );
 
   if (!hasBuild) {
-    return ts.parseCommandLine(commandLine, readFile);
+    throw new DiagnosticsError([
+      {
+        category: ts.DiagnosticCategory.Error,
+        code: 0,
+        file: undefined,
+        start: undefined,
+        length: undefined,
+        messageText:
+          'tsc-ls can only be used in build mode using --build (or -b) option.',
+      },
+    ]);
   }
 
   const buildTags = ['--dry', '--verbose', '--clean', '--force', '--watch'];

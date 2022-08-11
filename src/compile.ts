@@ -15,7 +15,7 @@ export type CompileResult = {
   hasErrors: boolean;
 };
 
-const getWriteDiagnostics = (diagnostics: ts.Diagnostic[]) => () => {
+export const getWriteDiagnostics = (diagnostics: ts.Diagnostic[]) => () => {
   process.stdout.write(
     ts.formatDiagnosticsWithColorAndContext(diagnostics, {
       getCurrentDirectory: () => process.cwd(),
@@ -42,7 +42,7 @@ export const compile = async ({
 
     const getScriptSnapshot = createCachedGetScriptSnapshot();
 
-    const { getServicesFromPath, projectsPaths, mainProjectPath, mainProject } =
+    const { getServicesFromPath, projectsPaths, mainProject } =
       createServicesFromConfig(
         {
           parsedCommandLine,
@@ -51,18 +51,14 @@ export const compile = async ({
         documentRegistry
       );
 
-    console.log(mainProjectPath);
-
     return await new Promise<CompileResult>((resolve) => {
       // nextTick() required for plugins using deasync lib
       process.nextTick(() => {
         for (const projectPath of projectsPaths) {
-          getServicesFromPath(projectPath)!.initialyzePluginsOnce();
+          getServicesFromPath(projectPath)!.initializePluginsOnce();
         }
 
         const diagnostics: ts.Diagnostic[] = [];
-
-        // const program = languageService.getProgram()!;
 
         const builderHost = createBuilderHost({
           mainProject,
@@ -74,56 +70,13 @@ export const compile = async ({
           },
         });
 
-        // const projects = new Set<string>(
-        //   (tsConfig.projectReferences ?? []).map((p) => p.path)
-        // );
-        // const fileNames = new Set<string>();
-
         const builder = ts.createSolutionBuilder(
           builderHost,
-          // (tsConfig.projectReferences ?? []).map((pr) => pr.path),
           [mainProject.basePath],
           mainProject.tsConfig.options as ts.BuildOptions
         );
 
-        console.log(
-          'BUILD',
-          builder.build(),
-          // projectsPaths,
-          mainProjectPath
-          // fileNames
-        );
-
-        // const files = Array.from(fileNames); // program.getSourceFiles().map(sf => sf.fileName);
-
-        // resetTS();
-
-        // diagnostics.push(
-        //   ...files.flatMap((fileName) => {
-        //     const services = getServicesFromPath(fileName);
-        //     if (!services || fileName.endsWith('.css')) {
-        //       return [];
-        //     }
-
-        //     try {
-        //       // return services
-        //       //   .initialyzePluginsOnce()
-        //       //   .languageService.getSemanticDiagnostics(fileName)
-        //       //   .filter((diag) => diag.messageText?.includes('GraphQL'));
-        //     } catch (e) {}
-        //     return [];
-        //     // try {
-        //     //   if (!fileName.endsWith('.css'))
-        //     //     return [
-        //     //       // ...languageService.getSemanticDiagnostics(fileName),
-        //     //       // ...languageService.getSyntacticDiagnostics(sf.fileName),
-        //     //     ];
-        //     // } catch (e) {
-        //     //   console.warn(e);
-        //     // }
-        //     // return [];
-        //   })
-        // );
+        builder.build();
 
         const hasErrors = diagnostics.some(
           ({ category }) => category === ts.DiagnosticCategory.Error

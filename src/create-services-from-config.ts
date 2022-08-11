@@ -8,6 +8,7 @@ import { createTSProxy } from './tools/create-ts-proxy';
 import { normalizeTSConfigPath } from './tools/normalize-tsconfig-path';
 
 export type PluginsResult = {
+  languageServiceHost: ts.LanguageServiceHost;
   languageService: ts.LanguageService;
   tsProxy: typeof ts;
 };
@@ -15,8 +16,7 @@ export type PluginsResult = {
 export type TSServices = {
   tsConfig: ts.ParsedCommandLine;
   basePath: string;
-  languageServiceHost: ts.LanguageServiceHost;
-  initialyzePluginsOnce: () => PluginsResult;
+  initializePluginsOnce: () => PluginsResult;
 };
 
 export type TSServicesMap = Record<string, TSServices | undefined>;
@@ -29,11 +29,13 @@ export const createServicesFromConfig = (
 ) => {
   const cwd = process.cwd();
 
-  const { tsConfig, basePath } = getTSConfig(parsedCommandLine);
+  const { tsConfig, basePath } = getTSConfig(parsedCommandLine, { logger });
 
   const plugins = getPlugins(tsConfig.options);
 
-  const languageServiceHost = createLanguageServiceHost(tsConfig, basePath);
+  const languageServiceHost = createLanguageServiceHost(tsConfig, basePath, {
+    logger,
+  });
 
   const languageServiceRaw = ts.createLanguageService(
     languageServiceHost,
@@ -44,9 +46,12 @@ export const createServicesFromConfig = (
 
   const tsProxy = createTSProxy();
 
-  const initialyzePluginsOnce = (): PluginsResult => {
+  /**
+   * Initialize plugins (only once !) then return mutated services.
+   */
+  const initializePluginsOnce = (): PluginsResult => {
     if (languageService) {
-      return { languageService, tsProxy };
+      return { languageService, languageServiceHost, tsProxy };
     }
 
     languageService = plugins.reduce(
@@ -62,15 +67,14 @@ export const createServicesFromConfig = (
       languageServiceRaw
     );
 
-    return { languageService, tsProxy };
+    return { languageService, languageServiceHost, tsProxy };
   };
 
   const initialMap: TSServicesMap = {
     [basePath]: {
       tsConfig,
       basePath,
-      languageServiceHost,
-      initialyzePluginsOnce,
+      initializePluginsOnce,
     },
   };
 
@@ -121,7 +125,6 @@ export const createServicesFromConfig = (
     servicesMap,
     getServicesFromPath,
     projectsPaths,
-    mainProjectPath,
     mainProject,
   };
 };

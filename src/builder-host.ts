@@ -23,28 +23,19 @@ export const createBuilderHost = ({
       diagnosticReporter
     );
 
-  // const projects = new Set<string>(
-  //   (tsConfig.projectReferences ?? []).map((p) => p.path)
-  // );
-  //   const fileNames = new Set<string>();
-
   builderHost.readFile = (path) => {
-    // if (path.includes('/cache/') || path.endsWith('.json')) {
-    //   return ts.sys.readFile(path);
-    // }
-
     const services = getServicesFromPath(path);
     if (!services) {
-      //   console.log('NOSERVICE', path);
       return ts.sys.readFile(path);
     }
 
-    const { tsProxy } = services.initialyzePluginsOnce();
+    if (path === services.tsConfig.options.tsBuildInfoFile) {
+      return ts.sys.readFile(path);
+    }
 
-    // if (path.includes('/cache/') || path.endsWith('.json'))
-    //   return ts.sys.readFile(path);
-    // fileNames.add(path);
-    // console.log(path);
+    const { tsProxy } = services.initializePluginsOnce();
+
+    // createLanguageServiceSourceFile may be overriden by plugins
     const sourceFile = tsProxy.createLanguageServiceSourceFile(
       path,
       getScriptSnapshot(path)!,
@@ -52,11 +43,11 @@ export const createBuilderHost = ({
       '',
       true
     );
-    const text = sourceFile.text;
-    // console.log(txt, sourceFile.isDeclarationFile);
-    return text;
+
+    return sourceFile.text;
   };
 
+  // use languageServiceHost.resolveModuleNames since it may be overriden by plugins
   builderHost.resolveModuleNames = (
     modulesNames,
     containingFile,
@@ -68,7 +59,8 @@ export const createBuilderHost = ({
     const services =
       getServicesFromPath(containingSourceFile!.fileName) ?? mainProject;
 
-    return services.languageServiceHost.resolveModuleNames!(
+    return services.initializePluginsOnce().languageServiceHost
+      .resolveModuleNames!(
       modulesNames,
       containingFile,
       reusedNames,
