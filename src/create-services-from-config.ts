@@ -4,12 +4,16 @@ import { getPlugins } from './get-plugins';
 import { getTSConfig } from './get-ts-config';
 import { initPlugin } from './init-plugin';
 import { createLanguageServiceHost } from './language-service-host';
+import {
+  createLanguageServiceWithDiagnostics,
+  LanguageServiceWithDiagnostics,
+} from './language-service-with-diagnostics';
 import { createTSProxy } from './tools/create-ts-proxy';
 import { normalizeTSConfigPath } from './tools/normalize-tsconfig-path';
 
 export type PluginsResult = {
   languageServiceHost: ts.LanguageServiceHost;
-  languageService: ts.LanguageService;
+  languageService: LanguageServiceWithDiagnostics;
   tsProxy: typeof ts;
 };
 
@@ -37,12 +41,11 @@ export const createServicesFromConfig = (
     logger,
   });
 
-  const languageServiceRaw = ts.createLanguageService(
-    languageServiceHost,
-    documentRegistry
+  const languageServiceRaw = createLanguageServiceWithDiagnostics(
+    ts.createLanguageService(languageServiceHost, documentRegistry)
   );
 
-  let languageService: ts.LanguageService | null = null;
+  let languageService: LanguageServiceWithDiagnostics | null = null;
 
   const tsProxy = createTSProxy();
 

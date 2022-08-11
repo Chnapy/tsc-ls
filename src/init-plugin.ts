@@ -1,11 +1,12 @@
 import ts from 'typescript/lib/tsserverlibrary';
+import { LanguageServiceWithDiagnostics } from './language-service-with-diagnostics';
 
 type PluginInit = (modules: { typescript: typeof ts }) => {
-  create: (info: ts.server.PluginCreateInfo) => ts.LanguageService;
+  create: (info: ts.server.PluginCreateInfo) => LanguageServiceWithDiagnostics;
 };
 
 type ExtraParams = {
-  languageService: ts.LanguageService;
+  languageService: LanguageServiceWithDiagnostics;
   languageServiceHost: ts.LanguageServiceHost;
   cwd: string;
   basePath: string;

@@ -53,7 +53,7 @@ describe('tsc-ls compiler in build mode', () => {
   describe('common TS code', () => {
     it('gives error with bad code', async () => {
       const result = await compileFromCommandLine(
-        '-b ./src/test-files/common-error'
+        '-b  --force ./src/test-files/common-error'
       );
 
       expectGlobalsNotChanged();
@@ -63,7 +63,7 @@ describe('tsc-ls compiler in build mode', () => {
 
     it('gives success with good code', async () => {
       const result = await compileFromCommandLine(
-        '-b ./src/test-files/common-success'
+        '-b  --force ./src/test-files/common-success'
       );
 
       expectGlobalsNotChanged();
@@ -75,7 +75,7 @@ describe('tsc-ls compiler in build mode', () => {
   describe('plugin typescript-plugin-css-modules', () => {
     it('gives error with bad code', async () => {
       const result = await compileFromCommandLine(
-        '-b ./src/test-files/typescript-plugin-css-modules-error'
+        '-b  --force ./src/test-files/typescript-plugin-css-modules-error'
       );
 
       expectGlobalsNotChanged();
@@ -85,7 +85,7 @@ describe('tsc-ls compiler in build mode', () => {
 
     it('gives success with good code', async () => {
       const result = await compileFromCommandLine(
-        '-b ./src/test-files/typescript-plugin-css-modules-success'
+        '-b  --force ./src/test-files/typescript-plugin-css-modules-success'
       );
 
       expectGlobalsNotChanged();
@@ -97,7 +97,7 @@ describe('tsc-ls compiler in build mode', () => {
   describe('plugin ts-gql-plugin', () => {
     it('gives error with bad code', async () => {
       const result = await compileFromCommandLine(
-        '-b ./src/test-files/ts-gql-plugin-error'
+        '-b  --force ./src/test-files/ts-gql-plugin-error'
       );
 
       expectGlobalsNotChanged();
@@ -107,7 +107,7 @@ describe('tsc-ls compiler in build mode', () => {
 
     it('gives success with good code', async () => {
       const result = await compileFromCommandLine(
-        '-b ./src/test-files/ts-gql-plugin-success'
+        '-b  --force ./src/test-files/ts-gql-plugin-success'
       );
 
       expectGlobalsNotChanged();
@@ -119,7 +119,7 @@ describe('tsc-ls compiler in build mode', () => {
   describe('multiple plugins: typescript-plugin-css-modules & ts-gql-plugin', () => {
     it('gives errors with bad code', async () => {
       const result = await compileFromCommandLine(
-        '-b ./src/test-files/multiple-plugins-error'
+        '-b  --force ./src/test-files/multiple-plugins-error'
       );
 
       expectGlobalsNotChanged();
@@ -129,7 +129,7 @@ describe('tsc-ls compiler in build mode', () => {
 
     it('gives success with good code', async () => {
       const result = await compileFromCommandLine(
-        '-b ./src/test-files/multiple-plugins-success'
+        '-b  --force ./src/test-files/multiple-plugins-success'
       );
 
       expectGlobalsNotChanged();
@@ -140,7 +140,7 @@ describe('tsc-ls compiler in build mode', () => {
 
   it('project references with common code & plugins', async () => {
     const result = await compileFromCommandLine(
-      '-b ./src/test-files/project-references'
+      '-b  --force ./src/test-files/project-references'
     );
 
     expectGlobalsNotChanged();

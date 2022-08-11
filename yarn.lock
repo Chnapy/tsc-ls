@@ -7956,9 +7956,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-gql-plugin@npm:1.3.1":
-  version: 1.3.1
-  resolution: "ts-gql-plugin@npm:1.3.1"
+"ts-gql-plugin@npm:1.3.2":
+  version: 1.3.2
+  resolution: "ts-gql-plugin@npm:1.3.2"
   dependencies:
     "@graphql-codegen/core": 2.5.1
     "@graphql-codegen/typescript": 2.4.10
@@ -7968,7 +7968,7 @@ __metadata:
   peerDependencies:
     graphql: ">= 16"
     graphql-tag: ">= 2"
-  checksum: b3f2a40a1dc487cd27a0f0afdfc9c9abc03308b7ffd1460ef07e5222787f0d6f9bd67cbe92fb99c002aa9e929b9cff2c1d246f5b2b815c2518577166e07c3302
+  checksum: aef2aaaa9d2eb3c1a503c9dc4b50ff460b6565ad180707f785bee9d3d96044ec0577423ca91e1d26f3087708586d4278445db1e672a285e68627a857972724e5
   languageName: node
   linkType: hard
 
@@ -8054,7 +8054,7 @@ __metadata:
     graphql-tag: 2.12.6
     jest: 28.1.3
     prettier: 2.7.1
-    ts-gql-plugin: 1.3.1
+    ts-gql-plugin: 1.3.2
     ts-node: 10.9.1
     tslib: 2.4.0
     typescript: 4.7.4

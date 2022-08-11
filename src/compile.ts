@@ -58,6 +58,9 @@ export const compile = async ({
           getServicesFromPath(projectPath)!.initializePluginsOnce();
         }
 
+        const { pluginsDiagnostics } =
+          mainProject.initializePluginsOnce().languageService;
+
         const diagnostics: ts.Diagnostic[] = [];
 
         const builderHost = createBuilderHost({
@@ -65,7 +68,6 @@ export const compile = async ({
           getServicesFromPath,
           getScriptSnapshot,
           diagnosticReporter: (diagnostic) => {
-            // TODO edit ts-gql-plugin to pass diagnostics directly
             diagnostics.push(diagnostic);
           },
         });
@@ -77,6 +79,10 @@ export const compile = async ({
         );
 
         builder.build();
+
+        diagnostics.push(
+          ...Array.from(pluginsDiagnostics.values()).flatMap((list) => list)
+        );
 
         const hasErrors = diagnostics.some(
           ({ category }) => category === ts.DiagnosticCategory.Error
