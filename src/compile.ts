@@ -80,9 +80,7 @@ export const compile = async ({
 
         builder.build();
 
-        diagnostics.push(
-          ...Array.from(pluginsDiagnostics.values()).flatMap((list) => list)
-        );
+        diagnostics.push(...[...pluginsDiagnostics.values()].flat());
 
         const hasErrors = diagnostics.some(
           ({ category }) => category === ts.DiagnosticCategory.Error
