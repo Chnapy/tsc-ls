@@ -8,7 +8,7 @@ TypeScript compiler overlay using language service plugins.
 One of TypeScript compiler limitation is its inability to use language services plugins during compilation.
 [By design](https://github.com/microsoft/TypeScript/wiki/Using-the-Language-Service-API), language services are meant to be used by editors only.
 
-This limitation makes not possible type-checking using some plugins in CLI environments, like with CIs.
+This limitation makes it impossible to type-check typescript plugins in CLI environments, like with CIs.
 
 A good example would be with [`typescript-plugin-css-modules`](https://github.com/mrmckeb/typescript-plugin-css-modules) plugin, which allows to add CSS classes typing:
 
@@ -50,17 +50,17 @@ This is why `tsc-ls` was made, to make compilation using language service plugin
 
 This tool is young, tested but only for some cases, nothing is guaranteed.
 
-This inconsistency is due to TypeScript environment, which does not allow to easily work with its compiler. Like said upper, language services were not meant to be used like that, only by editors.
-Like with some popular plugins, multiple globals may be mutated during process. `tsc-ls` cannot know what plugins will do, so it's not possible to offer a totally generic solution working with every plugins.
+This inconsistency is due to the TypeScript environment, which does not allow it to easily work with its compiler. As mentioned above, language services were not meant to be used outside of editors.
+Like with some popular plugins, multiple globals may be mutated during the process. `tsc-ls` cannot know what plugins will do, so it's not possible to offer a totally generic solution that works with every plugin.
 
 For now it was tested with these plugins:
 
 - [`typescript-plugin-css-modules`](https://github.com/mrmckeb/typescript-plugin-css-modules)
 - [`ts-gql-plugin`](https://github.com/Chnapy/ts-gql-plugin)
 
-Using others plugins may not work. In this case consider open an issue.
+Using other plugins may not work. In this case, consider opening an issue, I would be happy to help.
 
-Also only some of possible TypeScript projects configurations are handled, it may not work with your projects - again here, consider open an issue.
+Also, only some TypeScript project configurations are handled, it may not work with your projects - again here, consider opening an issue.
 
 Currently only TypeScript build mode is handled (with `--build` or `-b`).
 
