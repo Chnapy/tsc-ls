@@ -29,7 +29,7 @@ export const createBuilderHost = ({
       return ts.sys.readFile(path);
     }
 
-    if (path === services.tsConfig.options.tsBuildInfoFile) {
+    if (path.includes('.tsbuildinfo')) {
       return ts.sys.readFile(path);
     }
 
