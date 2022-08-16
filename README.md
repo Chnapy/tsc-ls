@@ -4,6 +4,7 @@ TypeScript compiler overlay using language service plugins.
 
 [![npm](https://img.shields.io/npm/v/tsc-ls)](https://www.npmjs.com/package/tsc-ls)
 [![license](https://img.shields.io/npm/l/tsc-ls)](https://github.com/chnapy/tsc-ls/blob/master/LICENSE)
+[![CI - CD](https://github.com/Chnapy/tsc-ls/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Chnapy/tsc-ls/actions/workflows/ci-cd.yml)
 
 One of TypeScript compiler limitation is its inability to use language services plugins during compilation.
 [By design](https://github.com/microsoft/TypeScript/wiki/Using-the-Language-Service-API), language services are meant to be used by editors only.
@@ -72,7 +73,7 @@ You may see some performance impact, depending on plugins you are using.
 yarn add -D tsc-ls
 ```
 
-You can use `tsc-ls` like `tsc`.
+You can use `tsc-ls` like `tsc`, using same [compiler options](https://www.typescriptlang.org/docs/handbook/compiler-options.html#compiler-options).
 
 ```
 yarn tsc-ls -b .
