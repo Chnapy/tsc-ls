@@ -1,60 +1,44 @@
-import fs from 'node:fs';
-import {
-  createLogger,
-  createSourceUpdater,
-  isValidFilename,
-  waitPromiseSync,
-} from 'ts-gql-plugin/tools';
 import ts from 'typescript';
-import { getPluginConfig } from './get-plugin-config';
+import { CompileOptions } from './compile';
+import { createCachedGetScriptSnapshot } from './get-script-snapshot';
 
 export const createLanguageServiceHost = (
-  { fileNames, options }: Pick<ts.ParsedCommandLine, 'fileNames' | 'options'>,
-  basePath: string
+  {
+    fileNames,
+    options,
+    projectReferences,
+  }: Pick<ts.ParsedCommandLine, 'fileNames' | 'options' | 'projectReferences'>,
+  basePath: string,
+  { logger = console.log }: Pick<CompileOptions, 'logger'>
 ): ts.LanguageServiceHost => {
-  const pluginConfig = getPluginConfig(options);
-
-  const updateSource = createSourceUpdater(
-    basePath,
-    pluginConfig,
-    createLogger(pluginConfig.logLevel, {
-      info: console.log,
-    })
-  );
-
-  const browsedFileNames = new Set<string>();
+  const host = ts.createCompilerHost(options);
 
   return {
+    useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
     getScriptFileNames: () => fileNames,
-    getScriptVersion: () => '0',
-    getScriptSnapshot: (fileName) => {
-      if (!fs.existsSync(fileName)) {
-        return undefined;
-      }
-
-      const source = fs.readFileSync(fileName).toString();
-
-      if (browsedFileNames.has(fileName)) {
-        return ts.ScriptSnapshot.fromString(source);
-      }
-
-      browsedFileNames.add(fileName);
-
-      if (isValidFilename(fileName)) {
-        return ts.ScriptSnapshot.fromString(
-          waitPromiseSync(updateSource(fileName, source))
-        );
-      }
-
-      return ts.ScriptSnapshot.fromString(source);
-    },
+    getScriptVersion: () => '',
+    getScriptSnapshot: createCachedGetScriptSnapshot(),
     getCurrentDirectory: () => basePath,
     getCompilationSettings: () => options,
+    getProjectReferences: () => projectReferences,
+    getCompilerHost: () => host,
     getDefaultLibFileName: ts.getDefaultLibFilePath,
     fileExists: ts.sys.fileExists,
     readFile: ts.sys.readFile,
     readDirectory: ts.sys.readDirectory,
     directoryExists: ts.sys.directoryExists,
     getDirectories: ts.sys.getDirectories,
+    resolveModuleNames: (moduleNames, containingFile) =>
+      moduleNames.map((moduleName): ts.ResolvedModule | undefined => {
+        const result = ts.resolveModuleName(
+          moduleName,
+          containingFile,
+          options,
+          host
+        );
+        return result.resolvedModule;
+      }),
+    log: logger,
+    trace: logger,
   };
 };

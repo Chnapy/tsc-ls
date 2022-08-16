@@ -107,6 +107,8 @@ const tsRules = {
   // Some example: Array.find() use, or graphql return data (data!.byPath!.prop!)
   // A null value is often easy to debug since it generally throw an error
   '@typescript-eslint/no-non-null-assertion': 'off',
+  '@typescript-eslint/no-explicit-any': 'off',
+  '@typescript-eslint/ban-ts-comment': 'off',
 
   'import/no-relative-packages': 'error',
   'import/no-anonymous-default-export': [
@@ -131,11 +133,7 @@ module.exports = {
     es6: true,
   },
   parserOptions: {
-    project: [
-      './tsconfig.json',
-      './example/tsconfig.json',
-      './tsc-gql/tsconfig.json',
-    ],
+    project: ['./tsconfig.json'],
     tsconfigRootDir: '.',
     sourceType: 'module',
     ecmaVersion: 8, // to enable features such as async/await
@@ -200,6 +198,7 @@ module.exports = {
         'unicorn/no-array-callback-reference': 'off',
         'unicorn/no-array-reduce': 'off',
         'unicorn/no-abusive-eslint-disable': 'off',
+        'unicorn/prefer-top-level-await': 'off',
       }),
     },
   ],

@@ -30,13 +30,13 @@ jobs:
         run: yarn c:type
 
       - name: Check - Tests
-        run: yarn c:test
+        run: yarn c:test:ci
 
       - name: Build
         run: yarn build
 
-      # - name: Publish to NPM (dry-run on PR)
-      #   uses: JS-DevTools/npm-publish@v1
-      #   with:
-      #     token: ${{ secrets.NPM_TOKEN }}
-      #     dry-run: ${{ github.ref != 'refs/heads/master' }}
+      - name: Publish to NPM (dry-run on PR)
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          dry-run: ${{ github.ref != 'refs/heads/master' }}

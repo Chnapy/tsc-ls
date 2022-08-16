@@ -1,5 +1,3 @@
-.pnp.*
-
 # Yarn zero-install
 .yarn/*
 !.yarn/cache
@@ -9,9 +7,9 @@
 !.yarn/sdks
 !.yarn/versions
 !.yarn/unplugged
-!.yarn/unplugged/**/node_modules
 
-node_modules/
-coverage/
+/node_modules/
+/coverage/
 
 dist/
+.tsbuildinfo

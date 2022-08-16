@@ -1,30 +1,63 @@
 import path from 'node:path';
 import ts from 'typescript';
+import { CompileOptions } from './compile';
+import { DiagnosticsError } from './tools/diagnostics-error';
+import { normalizeTSConfigPath } from './tools/normalize-tsconfig-path';
 
-export const getTSConfig = () => {
-  const args = ts.sys.args.slice(1);
+const getAbsolutePath = (value: string) =>
+  path.isAbsolute(value) ? value : path.join(process.cwd(), value);
 
-  const commandLine = ts.parseCommandLine(args, ts.sys.readFile);
+const getTSConfigPath = (parsedCommandLine: ts.ParsedCommandLine) => {
+  const pathsToCheck = [
+    parsedCommandLine.options.project,
+    ...parsedCommandLine.fileNames,
+    '.',
+  ];
 
-  const tsconfigPath =
-    commandLine.options.project ?? ts.findConfigFile('.', ts.sys.fileExists);
-  if (!tsconfigPath) {
-    throw new Error(`tsconfig not found`);
+  for (const pathToCheck of pathsToCheck) {
+    const foundPath =
+      pathToCheck &&
+      ts.findConfigFile(normalizeTSConfigPath(pathToCheck), ts.sys.fileExists);
+
+    if (foundPath) {
+      return foundPath;
+    }
+  }
+};
+
+const createParseConfigHost = ({
+  logger = console.log,
+}: Pick<CompileOptions, 'logger'>): ts.ParseConfigHost => ({
+  fileExists: ts.sys.fileExists,
+  readFile: ts.sys.readFile,
+  readDirectory: ts.sys.readDirectory,
+  useCaseSensitiveFileNames: true,
+  trace: logger,
+});
+
+export const getTSConfig = (
+  parsedCommandLine: ts.ParsedCommandLine,
+  { logger = console.log }: Pick<CompileOptions, 'logger'>
+) => {
+  if (parsedCommandLine.errors.length > 0) {
+    throw new DiagnosticsError(parsedCommandLine.errors);
   }
 
-  const basePath = path.dirname(tsconfigPath);
+  const tsConfigFoundPath = getTSConfigPath(parsedCommandLine);
+
+  if (!tsConfigFoundPath) {
+    throw new Error(`tsconfig file not found.`);
+  }
+
+  const absolutePath = getAbsolutePath(tsConfigFoundPath);
+
+  const basePath = path.dirname(absolutePath);
 
   const tsConfig = ts.parseJsonConfigFileContent(
-    ts.readConfigFile(tsconfigPath, ts.sys.readFile).config,
-    {
-      fileExists: ts.sys.fileExists,
-      readFile: ts.sys.readFile,
-      readDirectory: ts.sys.readDirectory,
-      useCaseSensitiveFileNames: true,
-      trace: console.log,
-    },
+    ts.readConfigFile(tsConfigFoundPath, ts.sys.readFile).config,
+    createParseConfigHost({ logger }),
     basePath,
-    commandLine.options
+    parsedCommandLine.options
   );
 
   return { tsConfig, basePath };
