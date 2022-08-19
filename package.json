@@ -1,9 +1,9 @@
 {
   "name": "tsc-ls",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "packageManager": "yarn@3.2.1",
   "license": "MIT",
-  "main": "./dist/compile.js",
+  "main": "./dist/index.js",
   "bin": "./dist/bin.js",
   "files": [
     "dist"
@@ -60,5 +60,8 @@
     "tslib": "2.4.0",
     "typescript": "4.7.4",
     "typescript-plugin-css-modules": "3.4.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.0.0"
   }
 }
