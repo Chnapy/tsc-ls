@@ -1,7 +1,10 @@
 import ts from 'typescript';
-import { createIsCSS } from 'typescript-plugin-css-modules/lib/helpers/cssExtensions';
 import { DiagnosticsError } from './tools/diagnostics-error';
 import { objectOverride } from './tools/object-override';
+
+const CSS_REGEXP = /\.module\.(((c|le|sa|sc)ss)|styl)$/;
+
+const isCSS = (fileName: string) => CSS_REGEXP.test(fileName);
 
 /**
  * Patch related to:
@@ -37,8 +40,6 @@ export const createPatchedBuilderProgram =
       oldProgram,
       configFileParsingDiagnostics
     );
-
-    const isCSS = createIsCSS();
 
     const CSSImportErrorRegex =
       /\.module\.(((c|le|sa|sc)ss)|styl)"?' (is not listed within the file list of project|is not a module|has no default export)/;
