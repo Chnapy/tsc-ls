@@ -29,7 +29,7 @@ jobs:
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
         with:
-          name: "tsc -b" vs "tsc-ls -b" no-plugins Benchmark
+          name: '"tsc -b" vs "tsc-ls -b" no-plugins Benchmark'
           tool: 'benchmarkjs'
           output-file-path: output.txt
           github-token: ${{ secrets.GITHUB_TOKEN  }}
