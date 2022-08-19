@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 import { CompileOptions } from './compile';
@@ -11,18 +12,32 @@ const getTSConfigPath = (parsedCommandLine: ts.ParsedCommandLine) => {
   const pathsToCheck = [
     parsedCommandLine.options.project,
     ...parsedCommandLine.fileNames,
-    '.',
-  ];
+  ].filter((rawPath): rawPath is string => !!rawPath);
 
-  for (const pathToCheck of pathsToCheck) {
-    const foundPath =
-      pathToCheck &&
-      ts.findConfigFile(normalizeTSConfigPath(pathToCheck), ts.sys.fileExists);
+  try {
+    for (const pathToCheck of pathsToCheck) {
+      const fileStat = fs.lstatSync(pathToCheck);
 
-    if (foundPath) {
-      return foundPath;
+      if (fileStat.isFile()) {
+        return pathToCheck;
+      }
+
+      return path.join(pathToCheck, 'tsconfig.json');
     }
+  } catch (error) {
+    throw new DiagnosticsError([
+      {
+        category: ts.DiagnosticCategory.Error,
+        code: 0,
+        file: undefined,
+        start: undefined,
+        length: undefined,
+        messageText: (error as Error).message,
+      },
+    ]);
   }
+
+  return ts.findConfigFile(normalizeTSConfigPath('.'), ts.sys.fileExists);
 };
 
 const createParseConfigHost = ({
@@ -46,7 +61,16 @@ export const getTSConfig = (
   const tsConfigFoundPath = getTSConfigPath(parsedCommandLine);
 
   if (!tsConfigFoundPath) {
-    throw new Error(`tsconfig file not found.`);
+    throw new DiagnosticsError([
+      {
+        category: ts.DiagnosticCategory.Error,
+        code: 0,
+        file: undefined,
+        start: undefined,
+        length: undefined,
+        messageText: 'tsconfig file not found.',
+      },
+    ]);
   }
 
   const absolutePath = getAbsolutePath(tsConfigFoundPath);
@@ -60,5 +84,5 @@ export const getTSConfig = (
     parsedCommandLine.options
   );
 
-  return { tsConfig, basePath };
+  return { tsConfig, basePath, tsConfigPath: absolutePath };
 };

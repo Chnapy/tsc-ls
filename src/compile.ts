@@ -74,7 +74,7 @@ export const compile = async ({
 
         const builder = ts.createSolutionBuilder(
           builderHost,
-          [mainProject.basePath],
+          [mainProject.tsConfigPath],
           mainProject.tsConfig.options as ts.BuildOptions
         );
 
