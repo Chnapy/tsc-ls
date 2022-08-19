@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "packageManager": "yarn@3.2.1",
   "license": "MIT",
-  "main": "./dist/compile.js",
+  "main": "./dist/index.js",
   "bin": "./dist/bin.js",
   "files": [
     "dist"

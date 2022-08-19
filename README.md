@@ -118,3 +118,39 @@ compile({
 ```
 
 For more check source files, like [bin.ts](./src/bin.ts).
+
+# Use by plugins
+
+`tsc-ls` pass to plugins a language service typed as `LanguageServiceWithDiagnostics` which has an optional `pluginsDiagnostics` property. It allows plugins to put diagnostics directly to compiler result. It can be useful when you want to pass errors outside of sourceFile creation/update process and trigger compilation error.
+
+```ts
+import { LanguageServiceWithDiagnostics, PluginInit } from 'tsc-ls';
+
+const init: PluginInit = (modules) => {
+  const ts = modules.typescript;
+
+  const create = (info) => {
+    const languageServiceWithDiagnostics: LanguageServiceWithDiagnostics = info.languageService;
+
+    const { pluginsDiagnostics } = languageServiceWithDiagnostics;
+
+    // plugin logic...
+
+    if(pluginsDiagnostics) {
+      const fileDiagnostics = pluginsDiagnostics.get(fileName) ?? [];
+
+      fileDiagnostics.push(
+        ...// put your errors & other diagnostics
+      );
+
+      pluginsDiagnostics.set(fileName, fileDiagnostics);
+    }
+
+    return languageServiceWithDiagnostics;
+  };
+
+  return { create };
+};
+
+export = init;
+```

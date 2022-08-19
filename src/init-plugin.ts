@@ -1,7 +1,7 @@
 import ts from 'typescript/lib/tsserverlibrary';
 import { LanguageServiceWithDiagnostics } from './language-service-with-diagnostics';
 
-type PluginInit = (modules: { typescript: typeof ts }) => {
+export type PluginInit = (modules: { typescript: typeof ts }) => {
   create: (info: ts.server.PluginCreateInfo) => LanguageServiceWithDiagnostics;
 };
 

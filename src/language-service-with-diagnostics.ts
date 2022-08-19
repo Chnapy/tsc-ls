@@ -4,7 +4,13 @@ const pluginsDiagnosticsProperty: keyof LanguageServiceWithDiagnostics =
   'pluginsDiagnostics';
 
 export type LanguageServiceWithDiagnostics = ts.LanguageService & {
-  pluginsDiagnostics: Map<string, ts.Diagnostic[]>;
+  /**
+   * Map of diagnostics passed to compiler, keyed by file name.
+   * Any error diagnostic fails compilation.
+   *
+   * fileName => diagnostic list
+   */
+  pluginsDiagnostics?: Map<string, ts.Diagnostic[]>;
 };
 
 export const createLanguageServiceWithDiagnostics = (
