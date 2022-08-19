@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-  pull_request: # TODO
 
 permissions:
   contents: write
@@ -12,7 +11,7 @@ permissions:
 
 jobs:
   benchmark:
-    name: Check performance regression.
+    name: Check performances
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,7 +19,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
 
       - name: Build
         run: yarn build
@@ -31,7 +29,7 @@ jobs:
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
         with:
-          name: Benchmark.js Benchmark
+          name: "tsc -b" vs "tsc-ls -b" no-plugins Benchmark
           tool: 'benchmarkjs'
           output-file-path: output.txt
           github-token: ${{ secrets.GITHUB_TOKEN  }}

@@ -9,21 +9,23 @@ const getAbsolutePath = (value: string) =>
   path.isAbsolute(value) ? value : path.join(process.cwd(), value);
 
 const getTSConfigPath = (parsedCommandLine: ts.ParsedCommandLine) => {
-  const pathsToCheck = [
+  const pathToCheck = [
     parsedCommandLine.options.project,
     ...parsedCommandLine.fileNames,
-  ].filter((rawPath): rawPath is string => !!rawPath);
+  ].find((rawPath): rawPath is string => !!rawPath);
+
+  if (!pathToCheck) {
+    return ts.findConfigFile(normalizeTSConfigPath('.'), ts.sys.fileExists);
+  }
 
   try {
-    for (const pathToCheck of pathsToCheck) {
-      const fileStat = fs.lstatSync(pathToCheck);
+    const fileStat = fs.lstatSync(pathToCheck);
 
-      if (fileStat.isFile()) {
-        return pathToCheck;
-      }
-
-      return path.join(pathToCheck, 'tsconfig.json');
+    if (fileStat.isFile()) {
+      return pathToCheck;
     }
+
+    return path.join(pathToCheck, 'tsconfig.json');
   } catch (error) {
     throw new DiagnosticsError([
       {
@@ -36,8 +38,6 @@ const getTSConfigPath = (parsedCommandLine: ts.ParsedCommandLine) => {
       },
     ]);
   }
-
-  return ts.findConfigFile(normalizeTSConfigPath('.'), ts.sys.fileExists);
 };
 
 const createParseConfigHost = ({

@@ -1,11 +1,11 @@
 import benchmark, { Event } from 'benchmark';
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 
 new benchmark.Suite()
-  .add('tsc', () => {
+  .add('tsc -b', () => {
     execSync('yarn tsc -b ./src/tsconfig.benchmark.json --force');
   })
-  .add('tsc-ls', () => {
+  .add('tsc-ls -b', () => {
     execSync('yarn node dist/bin.js -b ./src/tsconfig.benchmark.json --force');
   })
   .on('cycle', (event: Event) => {
