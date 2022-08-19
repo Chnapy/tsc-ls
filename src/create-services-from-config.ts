@@ -20,6 +20,7 @@ export type PluginsResult = {
 export type TSServices = {
   tsConfig: ts.ParsedCommandLine;
   basePath: string;
+  tsConfigPath: string;
   initializePluginsOnce: () => PluginsResult;
 };
 
@@ -34,7 +35,9 @@ export const createServicesFromConfig = (
 ) => {
   const cwd = process.cwd();
 
-  const { tsConfig, basePath } = getTSConfig(parsedCommandLine, { logger });
+  const { tsConfig, basePath, tsConfigPath } = getTSConfig(parsedCommandLine, {
+    logger,
+  });
 
   const plugins = getPlugins(tsConfig.options);
 
@@ -79,6 +82,7 @@ export const createServicesFromConfig = (
     [basePath]: {
       tsConfig,
       basePath,
+      tsConfigPath,
       initializePluginsOnce,
     },
   };

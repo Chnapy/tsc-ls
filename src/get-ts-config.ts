@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 import { CompileOptions } from './compile';
@@ -8,20 +9,34 @@ const getAbsolutePath = (value: string) =>
   path.isAbsolute(value) ? value : path.join(process.cwd(), value);
 
 const getTSConfigPath = (parsedCommandLine: ts.ParsedCommandLine) => {
-  const pathsToCheck = [
+  const pathToCheck = [
     parsedCommandLine.options.project,
     ...parsedCommandLine.fileNames,
-    '.',
-  ];
+  ].find((rawPath): rawPath is string => !!rawPath);
 
-  for (const pathToCheck of pathsToCheck) {
-    const foundPath =
-      pathToCheck &&
-      ts.findConfigFile(normalizeTSConfigPath(pathToCheck), ts.sys.fileExists);
+  if (!pathToCheck) {
+    return ts.findConfigFile(normalizeTSConfigPath('.'), ts.sys.fileExists);
+  }
 
-    if (foundPath) {
-      return foundPath;
+  try {
+    const fileStat = fs.lstatSync(pathToCheck);
+
+    if (fileStat.isFile()) {
+      return pathToCheck;
     }
+
+    return path.join(pathToCheck, 'tsconfig.json');
+  } catch (error) {
+    throw new DiagnosticsError([
+      {
+        category: ts.DiagnosticCategory.Error,
+        code: 0,
+        file: undefined,
+        start: undefined,
+        length: undefined,
+        messageText: (error as Error).message,
+      },
+    ]);
   }
 };
 
@@ -46,7 +61,16 @@ export const getTSConfig = (
   const tsConfigFoundPath = getTSConfigPath(parsedCommandLine);
 
   if (!tsConfigFoundPath) {
-    throw new Error(`tsconfig file not found.`);
+    throw new DiagnosticsError([
+      {
+        category: ts.DiagnosticCategory.Error,
+        code: 0,
+        file: undefined,
+        start: undefined,
+        length: undefined,
+        messageText: 'tsconfig file not found.',
+      },
+    ]);
   }
 
   const absolutePath = getAbsolutePath(tsConfigFoundPath);
@@ -60,5 +84,5 @@ export const getTSConfig = (
     parsedCommandLine.options
   );
 
-  return { tsConfig, basePath };
+  return { tsConfig, basePath, tsConfigPath: absolutePath };
 };

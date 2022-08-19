@@ -1,0 +1,40 @@
+name: Benchmark
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  benchmark:
+    name: Check performances
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Build
+        run: yarn build
+
+      - name: Run benchmark
+        run: yarn benchmark | tee output.txt
+
+      - name: Store benchmark result
+        uses: rhysd/github-action-benchmark@v1
+        with:
+          name: "tsc -b" vs "tsc-ls -b" no-plugins Benchmark
+          tool: 'benchmarkjs'
+          output-file-path: output.txt
+          github-token: ${{ secrets.GITHUB_TOKEN  }}
+          auto-push: true
+          alert-threshold: '130%'
+          comment-always: true
+          comment-on-alert: true
+          fail-on-alert: true
