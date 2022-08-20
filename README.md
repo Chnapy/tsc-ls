@@ -13,7 +13,7 @@ This limitation makes it impossible to type-check typescript plugins in CLI envi
 
 A good example would be with [`typescript-plugin-css-modules`](https://github.com/mrmckeb/typescript-plugin-css-modules) plugin, which allows to add CSS classes typing:
 
-```json
+```json5
 // tsconfig.json
 {
   "compilerOptions": {
