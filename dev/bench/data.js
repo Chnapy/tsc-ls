@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1661002169312,
+  "lastUpdate": 1661002173559,
   "repoUrl": "https://github.com/Chnapy/tsc-ls",
   "entries": {
     "\"tsc -b\" vs \"tsc-ls -b\" no-plugins Benchmark": [
@@ -56,6 +56,37 @@ window.BENCHMARK_DATA = {
             "name": "performance impact %: \"tsc-ls -b\" vs \"tsc -b\"",
             "value": 0,
             "range": "±2.95%",
+            "unit": "%",
+            "extra": "10 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "richardhaddad@hotmail.fr",
+            "name": "Richard Haddad",
+            "username": "Chnapy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "172513ef50f9c1d5f62aaa053efb87b3c850c741",
+          "message": "Update README.md",
+          "timestamp": "2022-08-20T15:27:36+02:00",
+          "tree_id": "d36525f8b1c8c1c42a0a2cf62273dc1519fcf005",
+          "url": "https://github.com/Chnapy/tsc-ls/commit/172513ef50f9c1d5f62aaa053efb87b3c850c741"
+        },
+        "date": 1661002172848,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "performance impact %: \"tsc-ls -b\" vs \"tsc -b\"",
+            "value": 0,
+            "range": "±3.76%",
             "unit": "%",
             "extra": "10 samples"
           }
