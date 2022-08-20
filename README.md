@@ -67,6 +67,14 @@ Currently only TypeScript build mode is handled (with `--build` or `-b`).
 
 You may see some performance impact, depending on plugins you are using.
 
+# Benchmark
+
+You can see performance impact using `tsc-ls -b` instead of `tsc -b` using no-plugins: https://chnapy.github.io/tsc-ls/dev/bench
+
+Benchmark is done without plugin to keep a consistant comparison basis. Also plugin performance impact depends entirely of plugin itself.
+
+If you have performance issues please first check plugins you are using.
+
 # Quick start
 
 ```
