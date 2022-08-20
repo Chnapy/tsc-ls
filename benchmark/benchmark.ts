@@ -33,14 +33,15 @@ const runBenchmark = (): void => {
     return runBenchmark();
   }
 
-  const diffPercent = (tscLsBench.hz * 100) / tscBench.hz - 100;
+  /* eslint-disable no-mixed-operators */
+  const diffPercent = Math.max((tscLsBench.hz * 100) / tscBench.hz - 100, 0);
 
   const name = 'performance impact %: "tsc-ls -b" vs "tsc -b"';
   const value = diffPercent.toFixed(2);
   const unit = '%';
-  const pm = '\xb1';
+  const pm = '\u00B1';
   const rme = rmeMax.toFixed(2);
-  const size = `${tscBench.stats.sample.length}+${tscLsBench.stats.sample.length}`;
+  const size = tscBench.stats.sample.length + tscLsBench.stats.sample.length;
 
   console.log(`${name} x ${value} ${unit} ${pm}${rme}% (${size} runs sampled)`);
 };
