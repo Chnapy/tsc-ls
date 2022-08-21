@@ -47,7 +47,7 @@ With this example, editors like VSCode shows correctly the error. But if you use
 
 This is why `tsc-ls` was made, to make compilation using language service plugins. So it shows errors in the console like it should.
 
-# Limitations
+## Limitations
 
 This tool is young, tested but only for some cases, nothing is guaranteed.
 
@@ -67,7 +67,7 @@ Currently only TypeScript build mode is handled (with `--build` or `-b`).
 
 You may see some performance impact, depending on plugins you are using.
 
-# Benchmark
+## Benchmark
 
 You can see performance impact using `tsc-ls -b` instead of `tsc -b` using no-plugins: https://chnapy.github.io/tsc-ls/dev/bench
 
@@ -75,7 +75,7 @@ Benchmark is done without plugin to keep a consistant comparison basis. Also plu
 
 If you have performance issues please first check plugins you are using.
 
-# Quick start
+## Quick start
 
 ```
 yarn add -D tsc-ls
@@ -99,7 +99,7 @@ You can now use this command into your `package.json`.
 }
 ```
 
-# Use into scripts
+## Use into scripts
 
 You can use this `tsc-ls` functions into your own scripts.
 
@@ -127,7 +127,7 @@ compile({
 
 For more check source files, like [bin.ts](./src/bin.ts).
 
-# Use by plugins
+## Use by plugins
 
 `tsc-ls` pass to plugins a language service typed as `LanguageServiceWithDiagnostics` which has an optional `pluginsDiagnostics` property. It allows plugins to put diagnostics directly to compiler result. It can be useful when you want to pass errors outside of sourceFile creation/update process and trigger compilation error.
 
