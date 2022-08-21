@@ -34,7 +34,7 @@ const runBenchmark = (): void => {
   }
 
   /* eslint-disable no-mixed-operators */
-  const diffPercent = Math.max((tscLsBench.hz * 100) / tscBench.hz - 100, 0);
+  const diffPercent = Math.max(100 - (tscLsBench.hz * 100) / tscBench.hz, 0);
 
   const name = 'performance impact %: "tsc-ls -b" vs "tsc -b"';
   const value = diffPercent.toFixed(2);
