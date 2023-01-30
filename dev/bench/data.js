@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675117216656,
+  "lastUpdate": 1675117994958,
   "repoUrl": "https://github.com/Chnapy/tsc-ls",
   "entries": {
     "\"tsc -b\" vs \"tsc-ls -b\" no-plugins Benchmark": [
@@ -91,6 +91,37 @@ window.BENCHMARK_DATA = {
             "name": "performance impact %: \"tsc-ls -b\" vs \"tsc -b\"",
             "value": 9.79,
             "range": "±3.11%",
+            "unit": "%",
+            "extra": "10 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "richardhaddad@hotmail.fr",
+            "name": "Richard Haddad",
+            "username": "Chnapy"
+          },
+          "committer": {
+            "email": "richardhaddad@hotmail.fr",
+            "name": "Richard Haddad",
+            "username": "Chnapy"
+          },
+          "distinct": true,
+          "id": "13601b050a53d33abc057bb58a2ac27558ac6b56",
+          "message": "fix devcontainer permission issues",
+          "timestamp": "2023-01-30T22:30:44Z",
+          "tree_id": "f7248e0ab9f21bc50ff626bd9b18e72770c8053c",
+          "url": "https://github.com/Chnapy/tsc-ls/commit/13601b050a53d33abc057bb58a2ac27558ac6b56"
+        },
+        "date": 1675117993513,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "performance impact %: \"tsc-ls -b\" vs \"tsc -b\"",
+            "value": 12.07,
+            "range": "±3.23%",
             "unit": "%",
             "extra": "10 samples"
           }
