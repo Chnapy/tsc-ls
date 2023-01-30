@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1661097623220,
+  "lastUpdate": 1675117216656,
   "repoUrl": "https://github.com/Chnapy/tsc-ls",
   "entries": {
     "\"tsc -b\" vs \"tsc-ls -b\" no-plugins Benchmark": [
@@ -60,6 +60,37 @@ window.BENCHMARK_DATA = {
             "name": "performance impact %: \"tsc-ls -b\" vs \"tsc -b\"",
             "value": 9.83,
             "range": "±1.24%",
+            "unit": "%",
+            "extra": "10 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "richardhaddad@hotmail.fr",
+            "name": "Richard Haddad",
+            "username": "Chnapy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7d9ef9ba2b2ba29954e8f026228b7b7cd72e0a5f",
+          "message": "0.0.5 - Improve ts-plugin-css-modules tests & update dependencies (#10)\n\n* improve ts-plugin-css-modules tests for #4\r\nupdate dependencies to latest, including yarn\r\nfix Dockerfile broken node version\r\n\r\n* improve ts-plugin-css-modules project-references tests\r\n\r\n* upgrade to 0.0.5",
+          "timestamp": "2023-01-30T23:17:58+01:00",
+          "tree_id": "76365625a84f24853dee851b6bd7c81c7cf39cce",
+          "url": "https://github.com/Chnapy/tsc-ls/commit/7d9ef9ba2b2ba29954e8f026228b7b7cd72e0a5f"
+        },
+        "date": 1675117215963,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "performance impact %: \"tsc-ls -b\" vs \"tsc -b\"",
+            "value": 9.79,
+            "range": "±3.11%",
             "unit": "%",
             "extra": "10 samples"
           }
