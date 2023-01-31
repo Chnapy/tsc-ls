@@ -4,6 +4,7 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
     "outDir": "dist",
+    "rootDir": "src",
 
     "allowSyntheticDefaultImports": true,
     "strict": true,
