@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675117994958,
+  "lastUpdate": 1675182076909,
   "repoUrl": "https://github.com/Chnapy/tsc-ls",
   "entries": {
     "\"tsc -b\" vs \"tsc-ls -b\" no-plugins Benchmark": [
@@ -124,6 +124,37 @@ window.BENCHMARK_DATA = {
             "range": "±3.23%",
             "unit": "%",
             "extra": "10 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "richardhaddad@hotmail.fr",
+            "name": "Richard Haddad",
+            "username": "Chnapy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c49d848eff32b43b9ff1a0b0954d3d4baf32c324",
+          "message": "Fix tsconfig basePath finding (#11)\n\n* fix tsconfig basePath finding #9\r\n\r\n* upgrade to 0.0.6",
+          "timestamp": "2023-01-31T17:19:58+01:00",
+          "tree_id": "56e70531531ef4b27df15bc04ed892543166e30a",
+          "url": "https://github.com/Chnapy/tsc-ls/commit/c49d848eff32b43b9ff1a0b0954d3d4baf32c324"
+        },
+        "date": 1675182075987,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "performance impact %: \"tsc-ls -b\" vs \"tsc -b\"",
+            "value": 100,
+            "range": "±1.35%",
+            "unit": "%",
+            "extra": "5 samples"
           }
         ]
       }
