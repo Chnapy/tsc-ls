@@ -1,6 +1,6 @@
 {
   "name": "tsc-ls",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "packageManager": "yarn@3.3.1",
   "license": "MIT",
   "main": "./dist/index.js",
