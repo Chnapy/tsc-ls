@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "src",
     "composite": true,
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",

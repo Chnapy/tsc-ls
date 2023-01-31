@@ -8,6 +8,16 @@ import { normalizeTSConfigPath } from './tools/normalize-tsconfig-path';
 const getAbsolutePath = (value: string) =>
   path.isAbsolute(value) ? value : path.join(process.cwd(), value);
 
+const searchForFirstTSConfig = (directory: string): string => {
+  const configPath = path.join(directory, 'tsconfig.json');
+
+  if (fs.existsSync(configPath)) {
+    return configPath;
+  }
+
+  return searchForFirstTSConfig(path.dirname(directory));
+};
+
 const getTSConfigPath = (parsedCommandLine: ts.ParsedCommandLine) => {
   const pathToCheck = [
     parsedCommandLine.options.project,
@@ -21,11 +31,9 @@ const getTSConfigPath = (parsedCommandLine: ts.ParsedCommandLine) => {
   try {
     const fileStat = fs.lstatSync(pathToCheck);
 
-    if (fileStat.isFile()) {
-      return pathToCheck;
-    }
-
-    return path.join(pathToCheck, 'tsconfig.json');
+    return searchForFirstTSConfig(
+      fileStat.isFile() ? path.dirname(pathToCheck) : pathToCheck
+    );
   } catch (error) {
     throw new DiagnosticsError([
       {
